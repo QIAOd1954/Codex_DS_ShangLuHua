@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>&#21830;&#38470;&#33457;&#26381;&#35013;&#21830;&#22478;</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="#top" aria-label="ShangLuHua">
+      <span class="brand-mark">&#21830;</span>
+      <span>
+        <strong>&#21830;&#38470;&#33457;</strong>
+        <small>&#26381;&#35013;&#25209;&#21457;&#21830;&#22478;</small>
+      </span>
+    </a>
+    <nav class="nav" aria-label="main">
+      <a href="#products">&#21830;&#21697;</a>
+      <a href="#customers">&#23458;&#25143;</a>
+      <a href="#matrix">&#24211;&#23384;</a>
+      <a href="#orders">&#21830;&#21333;</a>
+    </nav>
+    <div class="header-actions">
+      <button class="icon-button" type="button" id="refreshBtn" aria-label="Refresh">&#8635;</button>
+      <button class="icon-button" type="button" id="loginBtn" aria-label="Login" style="font-size:14px;font-weight:800">登录</button>
+      <button class="icon-button" type="button" id="logoutBtn" aria-label="Logout" style="font-size:14px;font-weight:800;display:none">退出</button>
+      <a class="cart-button" href="#products">&#37319;&#36141;&#36710; <span id="productCount">0</span></a>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">2026 Summer Wholesale</p>
+        <h1>&#26262;&#33394;&#26381;&#35013;&#29616;&#36135;&#25209;&#21457;&#65292;&#21830;&#21697;&#23458;&#25143;&#23454;&#26102;&#31649;&#29702;</h1>
+        <p class="hero-text">&#25353;&#27454;&#21495;&#12289;&#39068;&#33394;&#12289;&#23610;&#30721;&#31649;&#29702; SKU&#65292;&#21069;&#31471;&#30452;&#36830;&#21518;&#31471; API&#65292;&#25968;&#25454;&#23384;&#20837; MySQL&#12290;</p>
+        <div class="hero-actions">
+          <a class="primary-action" href="#products">&#31649;&#29702;&#21830;&#21697;</a>
+          <a class="secondary-action" href="#customers">&#31649;&#29702;&#23458;&#25143;</a>
+        </div>
+        <div class="hero-stats">
+          <span><strong id="statProducts">0</strong>&#27454;&#21830;&#21697;</span>
+          <span><strong id="statSkus">0</strong>SKU</span>
+          <span><strong id="statCustomers">0</strong>&#23458;&#25143;</span>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <img src="/assets/hero-look.png" alt="Fashion look" />
+        <div class="stock-note">
+          <strong>A1628</strong>
+          <span>&#31859;&#26447;&#34924;&#34923; 璺?&#29616;&#36135;&#25209;&#21457;</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="toolbar" aria-label="search">
+      <button type="button" class="active" data-filter="">&#20840;&#37096;</button>
+      <button type="button" data-filter="&#34924;&#34923;">&#34924;&#34923;</button>
+      <button type="button" data-filter="&#36830;&#34915;&#35033;">&#36830;&#34915;&#35033;</button>
+      <button type="button" data-filter="&#21322;&#36523;&#35033;">&#21322;&#36523;&#35033;</button>
+      <button type="button" data-filter="&#22871;&#35013;">&#22871;&#35013;</button>
+      <label>
+        <span>&#26597;&#27454;&#21495;</span>
+        <input id="productSearch" type="search" placeholder="A1628" />
+      </label>
+    </section>
+
+    <section id="products" class="section-heading">
+      <div>
+        <p class="eyebrow">Product CRUD</p>
+        <h2>&#21830;&#21697;&#31649;&#29702;</h2>
+      </div>
+      <button class="ghost-button" type="button" id="newProductBtn">&#26032;&#22686;&#21830;&#21697;</button>
+    </section>
+
+    <section class="crud-layout">
+      <form class="edit-panel" id="productForm">
+        <input type="hidden" id="productId" />
+        <div class="panel-title">
+          <h3 id="productFormTitle">&#26032;&#22686;&#21830;&#21697;</h3>
+          <button type="button" class="text-button" id="resetProductBtn">&#28165;&#31354;</button>
+        </div>
+        <div class="form-grid">
+          <label>&#27454;&#21495;<input id="code" required placeholder="A1628" /></label>
+          <label>&#21517;&#31216;<input id="name" required placeholder="Warm shirt" /></label>
+          <label>&#20998;&#31867;<input id="category" placeholder="Shirt" /></label>
+          <label>&#23395;&#33410;<input id="season" placeholder="Summer" /></label>
+          <label>&#20379;&#24212;&#21830;<input id="supplierName" placeholder="Hangzhou supplier" /></label>
+          <label>&#38646;&#21806;&#20215;<input id="retailPrice" type="number" min="0" step="0.01" value="99" /></label>
+          <label>&#25209;&#21457;&#20215;<input id="wholesalePrice" type="number" min="0" step="0.01" value="49" /></label>
+          <label>&#25104;&#26412;&#20215;<input id="costPrice" type="number" min="0" step="0.01" value="28" /></label>
+          <label class="wide">&#39068;&#33394;<input id="colors" placeholder="缁磭娅?閺夊繘绮?閺嶆顥? /></label>
+          <label class="wide">&#23610;&#30721;<input id="sizes" placeholder="S,M,L,XL" /></label>
+        </div>
+        <button class="submit-button" type="submit">&#20445;&#23384;&#21830;&#21697;</button>
+      </form>
+
+      <div class="data-panel">
+        <div id="productGrid" class="product-grid"></div>
+      </div>
+    </section>
+
+    <section id="customers" class="section-heading">
+      <div>
+        <p class="eyebrow">Customer CRUD</p>
+        <h2>&#23458;&#25143;&#31649;&#29702;</h2>
+      </div>
+      <div class="inline-search">
+        <input id="customerSearch" type="search" placeholder="&#25628;&#32034;&#23458;&#25143;" />
+        <button class="ghost-button" type="button" id="newCustomerBtn">&#26032;&#22686;&#23458;&#25143;</button>
+      </div>
+    </section>
+
+    <section class="crud-layout customers-layout">
+      <form class="edit-panel" id="customerForm">
+        <input type="hidden" id="customerId" />
+        <div class="panel-title">
+          <h3 id="customerFormTitle">&#26032;&#22686;&#23458;&#25143;</h3>
+          <button type="button" class="text-button" id="resetCustomerBtn">&#28165;&#31354;</button>
+        </div>
+        <div class="form-grid">
+          <label>&#23458;&#25143;&#21517;<input id="customerName" required placeholder="瀵姳绗侀張宥夈偘" /></label>
+          <label>&#25163;&#26426;<input id="phone" placeholder="13800000000" /></label>
+          <label>&#24494;&#20449;<input id="wechat" placeholder="wechat_id" /></label>
+          <label>&#31561;&#32423;<input id="levelName" placeholder="VIP" /></label>
+          <label class="wide">&#27424;&#27454;<input id="debtBalance" type="number" min="0" step="0.01" value="0" /></label>
+        </div>
+        <button class="submit-button" type="submit">&#20445;&#23384;&#23458;&#25143;</button>
+      </form>
+
+      <div class="data-panel">
+        <table class="data-table">
+          <thead>
+            <tr><th>&#23458;&#25143;</th><th>&#25163;&#26426;</th><th>&#31561;&#32423;</th><th>&#27424;&#27454;</th><th>&#25805;&#20316;</th></tr>
+          </thead>
+          <tbody id="customerRows"></tbody>
+        </table>
+      </div>
+    </section>
+
+
+    <section id="orders" class="section-heading">
+      <div>
+        <p class="eyebrow">Sales Orders</p>
+        <h2>商单管理</h2>
+      </div>
+      <div class="inline-search">
+        <input id="orderSearch" type="search" placeholder="搜索订单号/客户" />
+        <select id="orderStatusFilter" class="filter-select">
+          <option value="">全部状态</option>
+          <option value="DRAFT">草稿</option>
+          <option value="CONFIRMED">已确认</option>
+          <option value="CANCELED">已取消</option>
+        </select>
+      </div>
+    </section>
+
+    <section class="data-panel">
+      <table class="data-table">
+        <thead>
+          <tr><th>订单号</th><th>客户</th><th>总金额</th><th>已付</th><th>欠款</th><th>状态</th><th>时间</th><th>操作</th></tr>
+        </thead>
+        <tbody id="orderRows"></tbody>
+      </table>
+    </section>
+    <section id="matrix" class="wholesale-panel">
+      <div>
+        <p class="eyebrow">Inventory Matrix</p>
+        <h2>&#39068;&#33394;&#23610;&#30721;&#24211;&#23384;</h2>
+        <p>&#24211;&#23384;&#30001;&#21518;&#31471;&#28436;&#31034;&#25968;&#25454;&#33258;&#21160;&#29983;&#25104;&#65292;&#21830;&#21697;&#21015;&#34920;&#20013;&#21487;&#30475;&#21040;&#27599;&#27454;&#30340; SKU &#25968;&#37327;&#12290;</p>
+      </div>
+      <table>
+        <thead><tr><th>&#39068;&#33394;</th><th>S</th><th>M</th><th>L</th><th>XL</th></tr></thead>
+        <tbody>
+          <tr><th>&#31859;&#30333;</th><td>32</td><td>48</td><td>41</td><td>19</td></tr>
+          <tr><th>&#26447;&#40644;</th><td>28</td><td>56</td><td>34</td><td>15</td></tr>
+          <tr><th>&#26647;&#26837;</th><td>14</td><td>27</td><td>22</td><td>8</td></tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="/app.js"></script>
+
+  <div class="login-overlay" id="loginOverlay">
+    <div class="login-card">
+      <div class="brand" style="justify-content:center;margin-bottom:24px">
+        <span class="brand-mark">商</span>
+        <span><strong>商陆花</strong><small>服装批发管理</small></span>
+      </div>
+      <h3 style="margin:0 0 20px;text-align:center">管理员登录</h3>
+      <div class="login-form">
+        <label>用户名
+          <input id="loginUsername" type="text" placeholder="admin" autocomplete="username" />
+        </label>
+        <label>密码
+          <input id="loginPassword" type="password" placeholder="••••••" autocomplete="current-password" />
+        </label>
+        <button type="button" class="submit-button" id="loginSubmitBtn">登 录</button>
+        <p class="login-error" id="loginError"></p>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
+
+

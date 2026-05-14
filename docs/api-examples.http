@@ -1,0 +1,60 @@
+### Health
+GET http://localhost:8080/api/health
+
+### Create product
+POST http://localhost:8080/api/products
+Content-Type: application/json
+
+{
+  "code": "A1234",
+  "name": "闊╃増鐭琛～",
+  "category": "涓婅。",
+  "season": "澶?,
+  "supplierName": "鏉窞渚涘簲鍟?,
+  "retailPrice": 69,
+  "wholesalePrice": 35,
+  "costPrice": 20,
+  "skus": [
+    { "colorName": "榛戣壊", "sizeName": "S" },
+    { "colorName": "榛戣壊", "sizeName": "M" },
+    { "colorName": "鐧借壊", "sizeName": "S" },
+    { "colorName": "鐧借壊", "sizeName": "M" }
+  ]
+}
+
+### Create customer
+POST http://localhost:8080/api/customers
+Content-Type: application/json
+
+{
+  "name": "寮犱笁鏈嶉グ",
+  "phone": "13800000000",
+  "wechat": "zhangsan"
+}
+
+### Add inventory
+POST http://localhost:8080/api/inventory/adjust
+Content-Type: application/json
+
+{
+  "skuId": 1,
+  "warehouseCode": "MAIN",
+  "changeQuantity": 100,
+  "reason": "鏈熷垵鍏ュ簱"
+}
+
+### Create sales order
+POST http://localhost:8080/api/sales-orders
+Content-Type: application/json
+
+{
+  "customerId": 1,
+  "warehouseCode": "MAIN",
+  "paidAmount": 300,
+  "items": [
+    { "skuId": 1, "quantity": 10, "unitPrice": 35 }
+  ]
+}
+
+### Confirm sales order
+POST http://localhost:8080/api/sales-orders/1/confirm

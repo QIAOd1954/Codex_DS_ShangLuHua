@@ -1,0 +1,24 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: shangluhua
+  profiles:
+    active: mysql
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 2s
+
+app:
+  jwt:
+    secret: 'ShangLuHua2026SecretKeyForJwtTokenSigningMustBe256BitsLong!!'
+    expiration-ms: 86400000
+  seed:
+    enabled: true
+
+logging:
+  level:
+    com.shangluhua: INFO
