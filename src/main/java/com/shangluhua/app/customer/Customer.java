@@ -38,4 +38,5 @@ public class Customer {
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
     public Instant getCreatedAt() { return createdAt; }
+    //1
 }
