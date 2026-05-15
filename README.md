@@ -24,16 +24,15 @@
 ### 使用 MySQL 启动
 
 ```bash
-# 配置环境变量或修改 application-mysql.yml
-$env:JAVA_HOME="E:\JAVAjdk17"; $env:Path="$env:JAVA_HOME\bin;$env:Path"
+set JAVA_HOME=E:\JAVAjdk17
 mvn spring-boot:run
 ```
 
 ### 使用 H2 启动
 
+修改 `application.yml` 中 `profiles.active` 为 `h2`，然后：
+
 ```bash
-# 修改 application.yml 中 profiles.active 为 h2
-$env:JAVA_HOME="E:\JAVAjdk17"; $env:Path="$env:JAVA_HOME\bin;$env:Path"
 mvn spring-boot:run -Dspring.profiles.active=h2
 ```
 
