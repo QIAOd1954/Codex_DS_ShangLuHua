@@ -1,4 +1,4 @@
-﻿package com.shangluhua.app.product;
+package com.shangluhua.app.product;
 
 import java.math.BigDecimal;
 import java.util.List;

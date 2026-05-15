@@ -1,4 +1,4 @@
-﻿# 商陆花 (ShangLuHua)
+# 商陆花 (ShangLuHua)
 
 服装批发进销存与商单服务原型。
 
