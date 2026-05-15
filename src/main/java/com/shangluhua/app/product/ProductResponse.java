@@ -1,4 +1,4 @@
-package com.shangluhua.app.product;
+﻿package com.shangluhua.app.product;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -13,6 +13,7 @@ public record ProductResponse(
         BigDecimal retailPrice,
         BigDecimal wholesalePrice,
         BigDecimal costPrice,
+        String imageUrl,
         String status,
         List<ProductSkuResponse> skus
 ) {
@@ -27,6 +28,7 @@ public record ProductResponse(
                 spu.getRetailPrice(),
                 spu.getWholesalePrice(),
                 spu.getCostPrice(),
+                spu.getImageUrl(),
                 spu.getStatus(),
                 spu.getSkus().stream().map(ProductSkuResponse::from).toList()
         );

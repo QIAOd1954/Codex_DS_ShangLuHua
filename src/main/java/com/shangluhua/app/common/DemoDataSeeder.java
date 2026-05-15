@@ -94,6 +94,6 @@ public class DemoDataSeeder implements CommandLineRunner {
                 .flatMap(color -> sizes.stream().map(size -> new CreateProductRequest.SkuSpec(color, size, code + color + size)))
                 .toList();
         return new CreateProductRequest(code, name, category, season, supplier,
-                BigDecimal.valueOf(retail), BigDecimal.valueOf(wholesale), BigDecimal.valueOf(cost), skus);
+                BigDecimal.valueOf(retail), BigDecimal.valueOf(wholesale), BigDecimal.valueOf(cost), null, skus);
     }
 }

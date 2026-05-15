@@ -224,7 +224,7 @@
       transition: all 0.2s ease;
       font-size: 14px;
     }
-    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast { z-index: 30; } .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
     @media (max-width: 420px) {
       .product-card img { width: 80px; height: 80px; }
     }
@@ -233,13 +233,30 @@
 <body>
   <header class="app-header">
     <h1>商陆花 · 批发采购</h1>
-    <button class="cart-icon" id="cartBtn">
-      选购单 <span class="cart-count" id="cartCount">0</span>
-    </button>
+    <div style="display:flex;gap:8px">
+      <button class="cart-icon" id="historyBtn" style="background:var(--paper);border:1px solid var(--line)">历史订单</button>
+      <button class="cart-icon" id="cartBtn">
+        选购单 <span class="cart-count" id="cartCount">0</span>
+      </button>
+    </div>
   </header>
 
   <main id="app">
-    <div id="productList"></div>
+    <div id="productView">
+      <div id="productList"></div>
+    </div>
+    <div id="historyView" style="display:none">
+      <div style="margin-bottom:16px">
+        <label style="display:grid;gap:6px;color:var(--muted);font-size:13px;font-weight:800">
+          输入手机号查看历史订单
+          <div style="display:flex;gap:8px">
+            <input id="historyPhone" type="tel" placeholder="13800000000" style="flex:1;height:44px;padding:0 14px;border:1px solid var(--line);border-radius:8px;font-size:16px;background:#fffdf8" />
+            <button id="historySearchBtn" style="height:44px;padding:0 20px;border:0;border-radius:8px;background:var(--accent-dark);color:#fff;font-weight:800;cursor:pointer">查询</button>
+          </div>
+        </label>
+      </div>
+      <div id="orderList"></div>
+    </div>
   </main>
 
   <!-- Cart overlay -->
@@ -391,7 +408,7 @@
       }
       container.innerHTML = products.map((p, idx) => `
         <div class="product-card">
-          <img src="${images[idx % images.length]}" alt="${p.name}" />
+          <img src="${prodImg(p)}" alt="${p.name}" />
           <div class="product-info">
             <h3>${p.name || ""}</h3>
             <div class="code">${p.code || ""} ／ ${p.category || ""}</div>
@@ -466,6 +483,7 @@
     $("cartBtn").addEventListener("click", () => {
       $("cartOverlay").classList.add("open");
     });
+
     $("cartOverlay").addEventListener("click", (e) => {
       if (e.target === $("cartOverlay")) {
         $("cartOverlay").classList.remove("open");
@@ -485,7 +503,7 @@
         const res = await fetch("/api/share/orders", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ items, paidAmount: 0 }),
+          body: JSON.stringify({ items, paidAmount: 0, contactName: name, contactPhone: phone }),
         });
         if (!res.ok) {
           const err = await res.json();
@@ -509,7 +527,75 @@
       }
     });
 
-    // Load products
+    // Tab switching
+    $("historyBtn").addEventListener("click", () => {
+      $("productView").style.display = "none";
+      $("historyView").style.display = "block";
+      $("historyBtn").style.background = "var(--paper-strong)";
+      $("cartBtn").style.background = "var(--paper)";
+    });
+
+
+    // History orders
+    function renderOrders(orders) {
+      const container = $("orderList");
+      if (!orders || !orders.length) {
+        container.innerHTML = `<p style="text-align:center;padding:40px 0;color:var(--muted)">暂无订单记录</p>`;
+        return;
+      }
+      container.innerHTML = orders.map(o => `
+        <div style="margin-bottom:12px;padding:14px;border-radius:10px;background:var(--paper);border:1px solid var(--line)">
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+            <strong>${o.orderNo || ""}</strong>
+            <span class="badge ${o.status === "CONFIRMED" ? "badge-confirmed" : o.status === "CANCELED" ? "badge-canceled" : "badge-draft"}">${
+              o.status === "CONFIRMED" ? "已确认" : o.status === "CANCELED" ? "已取消" : "草稿"
+            }</span>
+          </div>
+          <div style="font-size:13px;color:var(--muted)">
+            <div>合计: <strong style="color:var(--accent-dark)">¥${money(o.totalAmount)}</strong> | 已付: ¥${money(o.paidAmount)} | 欠款: ¥${money(o.debtAmount)}</div>
+            <div style="margin-top:4px">${o.createdAt ? new Date(o.createdAt).toLocaleString() : ""}</div>
+          </div>
+          ${(o.items || []).length ? `
+          <details style="margin-top:8px;font-size:13px;color:var(--muted)">
+            <summary style="cursor:pointer;font-weight:800">查看明细 (${o.items.length} 项)</summary>
+            ${o.items.map(item => `
+              <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line)">
+                <span>${item.productName || ""} ${item.colorName || ""} ${item.sizeName || ""} × ${item.quantity || 0}</span>
+                <span>¥${money(item.amount)}</span>
+              </div>
+            `).join("")}
+          </details>
+          ` : ""}
+        </div>
+      `).join("");
+    }
+
+    $("historySearchBtn").addEventListener("click", async () => {
+      const phone = $("historyPhone").value.trim();
+      if (!phone) { toast("请输入手机号"); return; }
+      try {
+        const orders = await fetch(`/api/share/orders?phone=${encodeURIComponent(phone)}`).then(r => r.json());
+        renderOrders(orders);
+        if (!orders.length) toast("未找到该手机号的订单");
+      } catch (e) {
+        toast("查询失败: " + e.message);
+      }
+    });
+    $("historyPhone").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") $("historySearchBtn").click();
+    });
+
+    // Back to products from history
+    document.addEventListener("click", (e) => {
+      const backBtn = e.target.closest("[data-back-to-products]");
+      if (backBtn) {
+        $("productView").style.display = "";
+        $("historyView").style.display = "none";
+        $("historyBtn").style.background = "var(--paper)";
+      }
+    });
+
+    // // Load products
     fetch("/api/share/products")
       .then(r => r.json())
       .then(data => {

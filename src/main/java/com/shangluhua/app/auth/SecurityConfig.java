@@ -39,7 +39,7 @@ public class SecurityConfig {
                 .requestMatchers("/h2-console/**").permitAll()
                 .requestMatchers("/api/share/**").permitAll()
                 .requestMatchers("/mall", "/store", "/shop", "/buyer", "/buyer.html").permitAll()
-                .requestMatchers(HttpMethod.GET, "/", "/index.html", "/styles.css", "/app.js", "/assets/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/", "/index.html", "/styles.css", "/app.js", "/assets/**", "/uploads/**").permitAll()
                 .anyRequest().authenticated()
             )
             .headers(headers -> headers.frameOptions(fo -> fo.sameOrigin()))

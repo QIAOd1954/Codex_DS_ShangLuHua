@@ -13,5 +13,6 @@ public record UpdateProductRequest(
         BigDecimal retailPrice,
         BigDecimal wholesalePrice,
         BigDecimal costPrice,
+        String imageUrl,
         String status
 ) {}

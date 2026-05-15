@@ -16,6 +16,7 @@ public record CreateProductRequest(
         BigDecimal retailPrice,
         BigDecimal wholesalePrice,
         BigDecimal costPrice,
+        String imageUrl,
         @NotEmpty List<@Valid SkuSpec> skus
 ) {
     public record SkuSpec(@NotBlank String colorName, @NotBlank String sizeName, String barcode) {}

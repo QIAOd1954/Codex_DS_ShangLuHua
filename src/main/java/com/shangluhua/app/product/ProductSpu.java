@@ -34,6 +34,7 @@ public class ProductSpu {
     private BigDecimal retailPrice = BigDecimal.ZERO;
     private BigDecimal wholesalePrice = BigDecimal.ZERO;
     private BigDecimal costPrice = BigDecimal.ZERO;
+    private String imageUrl;
     private String status = "ON_SALE";
     private Instant createdAt = Instant.now();
 
@@ -62,6 +63,8 @@ public class ProductSpu {
     public void setWholesalePrice(BigDecimal wholesalePrice) { this.wholesalePrice = wholesalePrice; }
     public BigDecimal getCostPrice() { return costPrice; }
     public void setCostPrice(BigDecimal costPrice) { this.costPrice = costPrice; }
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
     public Instant getCreatedAt() { return createdAt; }

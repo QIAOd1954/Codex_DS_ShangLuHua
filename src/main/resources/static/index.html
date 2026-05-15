@@ -90,7 +90,16 @@
           <label>&#38646;&#21806;&#20215;<input id="retailPrice" type="number" min="0" step="0.01" value="99" /></label>
           <label>&#25209;&#21457;&#20215;<input id="wholesalePrice" type="number" min="0" step="0.01" value="49" /></label>
           <label>&#25104;&#26412;&#20215;<input id="costPrice" type="number" min="0" step="0.01" value="28" /></label>
-          <label class="wide">&#39068;&#33394;<input id="colors" placeholder="缁磭娅?閺夊繘绮?閺嶆顥? /></label>
+          <label>&#21830;&#21697;&#22270;&#29255;
+            <div style="display:flex;gap:8px;align-items:center">
+              <input id="imageUpload" type="file" accept="image/*" style="display:none" />
+              <button type="button" id="imageUploadBtn" class="ghost-button" style="font-size:13px">&#36873;&#25321;&#22270;&#29255;</button>
+              <span id="imageFileName" style="font-size:13px;color:var(--muted)">&#26410;&#36873;&#25321;</span>
+            </div>
+            <img id="imagePreview" style="max-width:100%;max-height:120px;margin-top:8px;border-radius:6px;display:none;object-fit:cover" />
+            <input type="hidden" id="imageUrl" />
+          </label>
+          <label class="wide">&#39068;&#33394;<input id="colors" placeholder="&#30333;,&#26447;&#40644;,&#26647;&#26837;" /></label>
           <label class="wide">&#23610;&#30721;<input id="sizes" placeholder="S,M,L,XL" /></label>
         </div>
         <button class="submit-button" type="submit">&#20445;&#23384;&#21830;&#21697;</button>
@@ -120,7 +129,7 @@
           <button type="button" class="text-button" id="resetCustomerBtn">&#28165;&#31354;</button>
         </div>
         <div class="form-grid">
-          <label>&#23458;&#25143;&#21517;<input id="customerName" required placeholder="瀵姳绗侀張宥夈偘" /></label>
+          <label>&#23458;&#25143;&#21517;<input id="customerName" required placeholder="张三服饰" /></label>
           <label>&#25163;&#26426;<input id="phone" placeholder="13800000000" /></label>
           <label>&#24494;&#20449;<input id="wechat" placeholder="wechat_id" /></label>
           <label>&#31561;&#32423;<input id="levelName" placeholder="VIP" /></label>
@@ -164,6 +173,59 @@
         <tbody id="orderRows"></tbody>
       </table>
     </section>
+    <section id="purchases" class="section-heading">
+      <div>
+        <p class="eyebrow">Purchase Orders</p>
+        <h2>采购入库</h2>
+      </div>
+      <button class="ghost-button" type="button" id="newPurchaseBtn">新增入库</button>
+    </section>
+
+    <section class="crud-layout">
+      <form class="edit-panel" id="purchaseForm" style="display:none">
+        <div class="panel-title">
+          <h3 id="purchaseFormTitle">新增入库单</h3>
+          <button type="button" class="text-button" id="resetPurchaseBtn">取消</button>
+        </div>
+        <div class="form-grid">
+          <label class="wide">商品SKU
+            <select id="purchaseSkuSelect" class="filter-select" style="width:100%">
+              <option value="">请先选择商品</option>
+            </select>
+          </label>
+          <label>仓库
+            <input id="purchaseWarehouse" value="MAIN" readonly style="background:#f5f0e4" />
+          </label>
+          <label>单价
+            <input id="purchaseUnitCost" type="number" min="0" step="0.01" readonly style="background:#f5f0e4" />
+          </label>
+          <label>数量
+            <input id="purchaseQuantity" type="number" min="1" value="1" />
+          </label>
+        </div>
+        <div id="purchaseItemContainer" class="purchase-items-list"></div>
+        <button class="submit-button" type="button" id="savePurchaseBtn" style="background:var(--accent-dark);color:#fffaf0;margin-top:8px">保存入库单</button>
+      </form>
+
+      <div class="data-panel">
+        <div style="margin-bottom:12px;display:flex;gap:10px">
+          <input id="purchaseSearch" type="search" placeholder="搜索入库单号" style="flex:1" />
+          <select id="purchaseStatusFilter" class="filter-select">
+            <option value="">全部状态</option>
+            <option value="DRAFT">草稿</option>
+            <option value="CONFIRMED">已入库</option>
+            <option value="CANCELED">已取消</option>
+          </select>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr><th>入库单号</th><th>供应商</th><th>总成本</th><th>状态</th><th>时间</th><th>操作</th></tr>
+          </thead>
+          <tbody id="purchaseRows"></tbody>
+        </table>
+      </div>
+    </section>
+
     <section id="matrix" class="wholesale-panel">
       <div>
         <p class="eyebrow">Inventory Matrix</p>

@@ -72,11 +72,13 @@ public class ProductService {
         spu.setCategory(request.category());
         spu.setSeason(request.season());
         spu.setSupplierName(request.supplierName());
+        spu.setImageUrl(request.imageUrl());
         spu.setRetailPrice(defaultMoney(request.retailPrice()));
         spu.setWholesalePrice(defaultMoney(request.wholesalePrice()));
         spu.setCostPrice(defaultMoney(request.costPrice()));
         if (request.status() != null && !request.status().isBlank()) {
-            spu.setStatus(request.status());
+            spu.setImageUrl(request.imageUrl());
+        spu.setStatus(request.status());
         }
         for (ProductSku sku : spu.getSkus()) {
             sku.setRetailPrice(spu.getRetailPrice());
@@ -99,6 +101,7 @@ public class ProductService {
         spu.setCategory(request.category());
         spu.setSeason(request.season());
         spu.setSupplierName(request.supplierName());
+        spu.setImageUrl(request.imageUrl());
         spu.setRetailPrice(defaultMoney(request.retailPrice()));
         spu.setWholesalePrice(defaultMoney(request.wholesalePrice()));
         spu.setCostPrice(defaultMoney(request.costPrice()));

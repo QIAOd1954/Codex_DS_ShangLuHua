@@ -400,3 +400,38 @@ input {
   .form-grid { grid-template-columns: 1fr; }
   .edit-panel { position: static; }
 }
+
+/* Purchase order */
+.purchase-items-list {
+  margin: 12px 0;
+  max-height: 240px;
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+.purchase-item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+}
+.purchase-item-row:last-child { border-bottom: 0; }
+.purchase-item-row .remove-item {
+  width: 26px; height: 26px;
+  border: 0; border-radius: 50%;
+  background: #f8d7da;
+  color: var(--danger);
+  font-weight: 800;
+  cursor: pointer;
+  display: grid; place-items: center;
+}
+.confirm-btn-sm {
+  min-height: 36px; padding: 0 12px;
+  border: 0; border-radius: 999px;
+  background: var(--accent-dark);
+  color: #fffaf0;
+  font-weight: 800;
+  cursor: pointer;
+}

@@ -134,6 +134,188 @@ function handleLogout() {
   showLogin();
 }
 
+// ======================== Purchases ========================
+
+const purchaseStatusLabels = { DRAFT: "草稿", CONFIRMED: "已入库", CANCELED: "已取消" };
+const purchaseStatusBadge = { DRAFT: "badge-draft", CONFIRMED: "badge-confirmed", CANCELED: "badge-canceled" };
+
+async function loadPurchases() {
+  const params = new URLSearchParams();
+  const keyword = $("purchaseSearch").value.trim();
+  const status = $("purchaseStatusFilter").value;
+  if (keyword) params.set("keyword", keyword);
+  if (status) params.set("status", status);
+  const qs = params.toString();
+  state.purchases = await api(`/api/purchase-orders${qs ? "?" + qs : ""}`);
+  renderPurchases();
+}
+
+function renderPurchases() {
+  const rows = $("purchaseRows");
+  if (!state.purchases.length) {
+    rows.innerHTML = `<tr><td colspan="6">暂无入库单</td></tr>`;
+    return;
+  }
+  rows.innerHTML = state.purchases.map((po) => `
+    <tr>
+      <td><strong>${po.orderNo || ""}</strong></td>
+      <td>${po.supplierName || "-"}</td>
+      <td>¥${money(po.totalCost)}</td>
+      <td><span class="badge ${purchaseStatusBadge[po.status] || ""}">${purchaseStatusLabels[po.status] || po.status}</span></td>
+      <td style="font-size:13px;color:var(--muted)">${po.createdAt ? new Date(po.createdAt).toLocaleString() : ""}</td>
+      <td>
+        <div class="row-actions">
+          <button type="button" data-view-purchase="${po.id}">详情</button>
+          ${po.status === "DRAFT" ? `<button type="button" class="confirm-btn-sm" data-confirm-purchase="${po.id}">入库</button>` : ""}
+          ${po.status === "DRAFT" ? `<button type="button" class="danger" data-cancel-purchase="${po.id}">取消</button>` : ""}
+        </div>
+      </td>
+    </tr>
+  `).join("");
+}
+
+// Purchase form - inline items
+function resetPurchaseForm() {
+  state.purchaseItems = [];
+  $("purchaseForm").style.display = "none";
+  $("purchaseSkuSelect").value = "";
+  $("purchaseQuantity").value = "1";
+  $("purchaseUnitCost").value = "";
+  $("purchaseFormTitle").textContent = "新增入库单";
+  renderPurchaseItems();
+}
+
+function renderPurchaseItems() {
+  const existing = document.getElementById("purchaseItemContainer");
+  if (!existing) return;
+  if (!state.purchaseItems.length) {
+    existing.innerHTML = `<p style="color:var(--muted);font-size:14px;padding:8px 0">暂未添加商品，请选择SKU并点击"添加至入库单"</p>`;
+    return;
+  }
+  existing.innerHTML = state.purchaseItems.map((item, idx) => `
+    <div class="purchase-item-row">
+      <span>${item.productName} / ${item.colorName} / ${item.sizeName} × ${item.quantity}</span>
+      <span>¥${money(item.unitCost)}</span>
+      <button type="button" class="remove-item" data-remove-purchase="${idx}">✕</button>
+    </div>
+  `).join("");
+}
+
+async function handleAddPurchaseItem(event) {
+  event.preventDefault();
+  const skuVal = $("purchaseSkuSelect").value;
+  const qty = parseInt($("purchaseQuantity").value) || 1;
+  if (!skuVal) { toast("请选择商品SKU"); return; }
+  const [spuId, skuId, color, size] = skuVal.split(":");
+  const product = state.products.find(p => String(p.id) === spuId);
+  const sku = (product?.skus || []).find(s => String(s.id) === skuId);
+  if (!sku) { toast("SKU不存在"); return; }
+  
+  state.purchaseItems.push({
+    skuId: sku.id,
+    productName: product.name,
+    colorName: sku.colorName,
+    sizeName: sku.sizeName,
+    quantity: qty,
+    unitCost: Number(sku.costPrice || 0),
+  });
+  renderPurchaseItems();
+  toast(`已添加 ${product.name} (${sku.colorName}/${sku.sizeName}) × ${qty}`);
+}
+
+async function savePurchase(event) {
+  event.preventDefault();
+  if (!state.purchaseItems.length) { toast("请至少添加一个商品"); return; }
+  const warehouse = $("purchaseWarehouse").value.trim() || "MAIN";
+  try {
+    const order = await api("/api/purchase-orders", {
+      method: "POST",
+      body: JSON.stringify({
+        warehouseCode: warehouse,
+        items: state.purchaseItems.map(i => ({ skuId: i.skuId, quantity: i.quantity })),
+      }),
+    });
+    toast(`入库单已创建: ${order.orderNo}`);
+    resetPurchaseForm();
+    await loadPurchases();
+  } catch (e) {
+    toast(e.message || "创建失败");
+  }
+}
+
+async function handleViewPurchase(orderId) {
+  const po = state.purchases.find(p => String(p.id) === String(orderId));
+  if (!po) return;
+  const overlay = document.createElement("div");
+  overlay.className = "modal-overlay";
+  overlay.innerHTML = `
+    <div class="modal-card">
+      <h3>入库单详情 — ${po.orderNo}</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;font-size:14px">
+        <div><strong>供应商：</strong>${po.supplierName || "-"}</div>
+        <div><strong>仓库：</strong>${po.warehouseCode || "MAIN"}</div>
+        <div><strong>总成本：</strong>¥${money(po.totalCost)}</div>
+        <div><strong>状态：</strong><span class="badge ${purchaseStatusBadge[po.status] || ""}">${purchaseStatusLabels[po.status] || po.status}</span></div>
+        <div><strong>创建时间：</strong>${po.createdAt ? new Date(po.createdAt).toLocaleString() : ""}</div>
+        <div><strong>入库时间：</strong>${po.confirmedAt ? new Date(po.confirmedAt).toLocaleString() : "-"}</div>
+      </div>
+      <table>
+        <thead><tr><th>商品</th><th>颜色</th><th>尺码</th><th>数量</th><th>单价</th><th>小计</th></tr></thead>
+        <tbody>
+          ${(po.items || []).map((item) => `
+            <tr>
+              <td>${item.productName || ""}<br><small style="color:var(--muted)">${item.skuCode || ""}</small></td>
+              <td>${item.colorName || ""}</td>
+              <td>${item.sizeName || ""}</td>
+              <td>${item.quantity || 0}</td>
+              <td>¥${money(item.unitCost)}</td>
+              <td>¥${money(item.amount)}</td>
+            </tr>
+          `).join("") || `<tr><td colspan="6">无明细</td></tr>`}
+        </tbody>
+      </table>
+      <div class="modal-actions">
+        <button type="button" class="close-btn" data-close-modal>关闭</button>
+      </div>
+    </div>
+  `;
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay || e.target.closest("[data-close-modal]")) overlay.remove();
+  });
+  document.body.appendChild(overlay);
+}
+
+function populateSkuSelect() {
+  const select = $("purchaseSkuSelect");
+  select.innerHTML = `<option value="">请选择商品和SKU</option>`;
+  const products = state.products.filter(p => p.status !== "DELETED");
+  for (const p of products) {
+    for (const sku of (p.skus || [])) {
+      const val = `${p.id}:${sku.id}:${sku.colorName || ""}:${sku.sizeName || ""}`;
+      const label = `${p.code || ""} ${p.name || ""} / ${sku.colorName || ""} / ${sku.sizeName || ""}`;
+      select.innerHTML += `<option value="${val}">${label}</option>`;
+    }
+  }
+}
+
+async function handleConfirmPurchase(orderId) {
+  if (!confirm("确认入库？确认后将增加对应SKU的库存数量。")) return;
+  try {
+    await api(`/api/purchase-orders/${orderId}/confirm`, { method: "POST" });
+    toast("已入库");
+    await loadPurchases();
+  } catch (e) { toast(e.message || "入库失败"); }
+}
+
+async function handleCancelPurchase(orderId) {
+  if (!confirm("取消该入库单？")) return;
+  try {
+    await api(`/api/purchase-orders/${orderId}/cancel`, { method: "POST" });
+    toast("已取消");
+    await loadPurchases();
+  } catch (e) { toast(e.message || "取消失败"); }
+}
+
 // ======================== Products ========================
 
 async function loadProducts() {
@@ -162,7 +344,7 @@ function renderProducts() {
     const sizes = [...new Set((product.skus || []).map((sku) => sku.sizeName).filter(Boolean))].join(" / ") || "-";
     return `
       <article class="product-card">
-        <img src="${productImages[index % productImages.length]}" alt="${product.name}" />
+        <img src="${productImageUrl(product)}" alt="${product.name}" />
         <div class="product-info">
           <p class="code">${product.code || ""} ／ ${product.category || ""}</p>
           <h3>${product.name || ""}</h3>
@@ -487,7 +669,7 @@ async function handleDocumentClick(event) {
 
 async function refreshAll() {
   try {
-    await Promise.all([loadProducts(), loadCustomers(), loadOrders()]);
+    await Promise.all([loadProducts(), loadCustomers(), loadOrders(), loadPurchases()]);
   } catch (error) {
     if (error.message !== "登录已过期，请重新登录") {
       toast(error.message || "数据加载失败");
@@ -514,6 +696,32 @@ async function init() {
   $("productForm").addEventListener("submit", (event) => saveProduct(event).catch((error) => toast(error.message)));
   $("customerForm").addEventListener("submit", (event) => saveCustomer(event).catch((error) => toast(error.message)));
   $("resetProductBtn").addEventListener("click", resetProductForm);
+
+  // Image upload
+  $("imageUploadBtn").addEventListener("click", () => $("imageUpload").click());
+  $("imageUpload").addEventListener("change", async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) { toast("请选择图片文件"); return; }
+    if (file.size > 5 * 1024 * 1024) { toast("图片不能超过5MB"); return; }
+    const formData = new FormData();
+    formData.append("file", file);
+    try {
+      const result = await fetch("/api/upload", {
+        method: "POST",
+        headers: { "Authorization": "Bearer " + state.token },
+        body: formData,
+      });
+      if (!result.ok) { const err = await result.json(); throw new Error(err.message || "上传失败"); }
+      const data = await result.json();
+      $("imageUrl").value = data.url;
+      $("imagePreview").src = data.url;
+      $("imagePreview").style.display = "";
+      $("imageFileName").textContent = file.name;
+      toast("图片已上传");
+    } catch (err) { toast(err.message || "上传失败"); }
+    e.target.value = "";
+  });
   $("resetCustomerBtn").addEventListener("click", resetCustomerForm);
   $("newProductBtn").addEventListener("click", resetProductForm);
   $("newCustomerBtn").addEventListener("click", resetCustomerForm);
@@ -522,6 +730,24 @@ async function init() {
   $("customerSearch").addEventListener("input", () => loadCustomers().catch((error) => toast(error.message)));
   $("orderSearch").addEventListener("input", () => loadOrders().catch((error) => toast(error.message)));
   $("orderStatusFilter").addEventListener("change", () => loadOrders().catch((error) => toast(error.message)));
+  $("purchaseSearch").addEventListener("input", () => loadPurchases().catch((error) => toast(error.message)));
+  $("purchaseStatusFilter").addEventListener("change", () => loadPurchases().catch((error) => toast(error.message)));
+  $("newPurchaseBtn").addEventListener("click", () => {
+    resetPurchaseForm();
+    $("purchaseForm").style.display = "";
+    populateSkuSelect();
+  });
+  $("resetPurchaseBtn").addEventListener("click", resetPurchaseForm);
+  $("purchaseForm").addEventListener("submit", (e) => handleAddPurchaseItem(e).catch((error) => toast(error.message)));
+  $("savePurchaseBtn").addEventListener("click", (e) => savePurchase(e).catch((error) => toast(error.message)));
+  $("purchaseSkuSelect").addEventListener("change", () => {
+    const val = $("purchaseSkuSelect").value;
+    if (!val) { $("purchaseUnitCost").value = ""; return; }
+    const [spuId, skuId] = val.split(":");
+    const product = state.products.find(p => String(p.id) === spuId);
+    const sku = (product?.skus || []).find(s => String(s.id) === skuId);
+    $("purchaseUnitCost").value = sku?.costPrice || 0;
+  });
 
   document.querySelectorAll(".toolbar button").forEach((button) => {
     button.addEventListener("click", () => {
