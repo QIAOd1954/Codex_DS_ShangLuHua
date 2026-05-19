@@ -25,7 +25,7 @@ public class InventoryController {
     }
 
     @GetMapping("/{skuId}")
-    public InventoryBalance get(@PathVariable Long skuId, @RequestParam(required = false) String warehouseCode) {
+    public InventoryBalance get(@PathVariable Long skuId, @RequestParam(name = "warehouseCode", required = false) String warehouseCode) {
         return inventoryService.getBalance(skuId, warehouseCode);
     }
 }

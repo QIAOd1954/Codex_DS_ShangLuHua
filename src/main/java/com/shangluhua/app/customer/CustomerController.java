@@ -32,9 +32,9 @@ public class CustomerController {
     }
 
     @GetMapping
-    public List<CustomerResponse> search(@RequestParam(required = false) String keyword,
-                                         @RequestParam(defaultValue = "0") int page,
-                                         @RequestParam(defaultValue = "100") int size) {
+    public List<CustomerResponse> search(@RequestParam(name = "keyword", required = false) String keyword,
+                                         @RequestParam(name = "page", defaultValue = "0") int page,
+                                         @RequestParam(name = "size", defaultValue = "100") int size) {
         return customerService.search(keyword, page, size).stream().map(CustomerResponse::from).toList();
     }
 

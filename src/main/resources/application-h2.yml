@@ -8,6 +8,8 @@ spring:
     console:
       enabled: true
       path: /h2-console
+  cache:
+    type: simple
   jpa:
     hibernate:
       ddl-auto: update

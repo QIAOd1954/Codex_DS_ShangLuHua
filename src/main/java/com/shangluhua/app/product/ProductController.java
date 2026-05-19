@@ -32,9 +32,9 @@ public class ProductController {
     }
 
     @GetMapping
-    public List<ProductResponse> search(@RequestParam(required = false) String keyword,
-                                        @RequestParam(defaultValue = "0") int page,
-                                        @RequestParam(defaultValue = "100") int size) {
+    public List<ProductResponse> search(@RequestParam(name = "keyword", required = false) String keyword,
+                                        @RequestParam(name = "page", defaultValue = "0") int page,
+                                        @RequestParam(name = "size", defaultValue = "100") int size) {
         return productService.search(keyword, page, size).stream().map(ProductResponse::from).toList();
     }
 

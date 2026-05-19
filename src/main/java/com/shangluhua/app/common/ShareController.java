@@ -41,7 +41,7 @@ public class ShareController {
     }
 
     @GetMapping("/orders")
-    public List<SalesOrderResponse> searchOrders(@RequestParam(required = false) String phone) {
+    public List<SalesOrderResponse> searchOrders(@RequestParam(name = "phone", required = false) String phone) {
         if (phone != null && !phone.isBlank()) {
             return salesOrderService.searchByPhone(phone)
                     .stream().map(SalesOrderResponse::from).toList();
