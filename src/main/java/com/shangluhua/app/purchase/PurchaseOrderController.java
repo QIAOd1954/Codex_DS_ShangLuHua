@@ -33,8 +33,10 @@ public class PurchaseOrderController {
     @GetMapping
     public List<PurchaseOrderResponse> search(
             @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) String status) {
-        return purchaseOrderService.search(keyword, status)
+            @RequestParam(required = false) String status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "100") int size) {
+        return purchaseOrderService.search(keyword, status, page, size)
                 .stream().map(PurchaseOrderResponse::from).toList();
     }
 

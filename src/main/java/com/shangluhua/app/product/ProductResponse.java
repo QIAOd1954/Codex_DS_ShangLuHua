@@ -14,7 +14,7 @@ public record ProductResponse(
         BigDecimal wholesalePrice,
         BigDecimal costPrice,
         String imageUrl,
-        String status,
+        ProductStatus status,
         List<ProductSkuResponse> skus
 ) {
     public static ProductResponse from(ProductSpu spu) {

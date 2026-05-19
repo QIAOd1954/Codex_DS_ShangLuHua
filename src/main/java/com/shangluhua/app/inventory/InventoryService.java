@@ -22,8 +22,8 @@ public class InventoryService {
     }
 
     @Transactional
-    public InventoryBalance adjust(Long skuId, String warehouseCode, int changeQuantity, String bizType, Long bizId) {
-        ProductSku sku = skuRepository.findById(skuId).orElseThrow(() -> new ApiException("SKU not found: " + skuId));
+    public InventoryBalance adjust(Long skuId, String warehouseCode, int changeQuantity, InventoryBizType bizType, Long bizId) {
+        ProductSku sku = skuRepository.findById(skuId).orElseThrow(() -> new ApiException("SKU不存在: " + skuId));
         String warehouse = normalizeWarehouse(warehouseCode);
         InventoryBalance balance = balanceRepository.lockByWarehouseCodeAndSkuId(warehouse, skuId)
                 .orElseGet(() -> createBalance(warehouse, sku));
@@ -31,7 +31,7 @@ public class InventoryService {
         int before = balance.getQuantity();
         int after = before + changeQuantity;
         if (after < 0) {
-            throw new ApiException("Insufficient inventory. Current " + before + ", change " + changeQuantity);
+            throw new ApiException("库存不足。当前 " + before + "，需要变动 " + changeQuantity);
         }
 
         balance.setQuantity(after);
@@ -53,7 +53,7 @@ public class InventoryService {
 
     public InventoryBalance getBalance(Long skuId, String warehouseCode) {
         return balanceRepository.findByWarehouseCodeAndSkuId(normalizeWarehouse(warehouseCode), skuId)
-                .orElseThrow(() -> new ApiException("Inventory balance not found"));
+                .orElseThrow(() -> new ApiException("库存记录不存在"));
     }
 
     private InventoryBalance createBalance(String warehouseCode, ProductSku sku) {

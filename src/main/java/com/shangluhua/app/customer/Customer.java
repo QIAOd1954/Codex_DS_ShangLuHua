@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.time.Instant;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -21,7 +23,8 @@ public class Customer {
     private String wechat;
     private String levelName = "Wholesale";
     private BigDecimal debtBalance = BigDecimal.ZERO;
-    private String status = "ACTIVE";
+    @Enumerated(EnumType.STRING)
+    private CustomerStatus status = CustomerStatus.ACTIVE;
     private Instant createdAt = Instant.now();
 
     public Long getId() { return id; }
@@ -35,8 +38,8 @@ public class Customer {
     public void setLevelName(String levelName) { this.levelName = levelName; }
     public BigDecimal getDebtBalance() { return debtBalance; }
     public void setDebtBalance(BigDecimal debtBalance) { this.debtBalance = debtBalance; }
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public CustomerStatus getStatus() { return status; }
+    public void setStatus(CustomerStatus status) { this.status = status; }
     public Instant getCreatedAt() { return createdAt; }
     //1
 }

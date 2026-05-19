@@ -6,15 +6,22 @@ spring:
     name: shangluhua
   profiles:
     active: mysql
+  sql:
+    init:
+      mode: never
   data:
     redis:
       host: localhost
       port: 6379
       timeout: 2s
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 10MB
 
 app:
   jwt:
-    secret: 'ShangLuHua2026SecretKeyForJwtTokenSigningMustBe256BitsLong!!'
+    secret: ${JWT_SECRET:ShangLuHua2026SecretKeyForJwtTokenSigningMustBe256BitsLong!!}
     expiration-ms: 86400000
   seed:
     enabled: true

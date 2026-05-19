@@ -21,7 +21,7 @@ public class InventoryController {
 
     @PostMapping("/adjust")
     public InventoryBalance adjust(@Valid @RequestBody AdjustInventoryRequest request) {
-        return inventoryService.adjust(request.skuId(), request.warehouseCode(), request.changeQuantity(), "MANUAL_ADJUST", null);
+        return inventoryService.adjust(request.skuId(), request.warehouseCode(), request.changeQuantity(), InventoryBizType.MANUAL_ADJUST, null);
     }
 
     @GetMapping("/{skuId}")

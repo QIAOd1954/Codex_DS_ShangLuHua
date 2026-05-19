@@ -1,0 +1,17 @@
+spring:
+  profiles:
+    active: h2
+  sql:
+    init:
+      mode: never
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 2s
+
+app:
+  jwt:
+    secret: test-secret-key-for-jwt-unit-testing-which-has-256-bits
+  seed:
+    enabled: false

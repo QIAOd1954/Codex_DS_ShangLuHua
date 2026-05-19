@@ -6,6 +6,8 @@ import java.util.Optional;
 
 import jakarta.persistence.LockModeType;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
@@ -16,6 +18,8 @@ public interface SalesOrderRepository extends JpaRepository<SalesOrder, Long> {
     List<SalesOrder> findByContactPhoneOrderByCreatedAtDesc(String contactPhone);
 
     List<SalesOrder> findTop100ByOrderByCreatedAtDesc();
+
+    Page<SalesOrder> findAllByOrderByCreatedAtDesc(Pageable pageable);
 
     List<SalesOrder> findByOrderNoContainingIgnoreCaseOrderByCreatedAtDesc(String orderNo);
 

@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -21,13 +22,22 @@ import com.shangluhua.app.common.ApiException;
 @RequestMapping("/api/upload")
 public class FileUploadController {
 
-    @Value("${app.upload.dir:src/main/resources/static/uploads}")
+    private static final Set<String> ALLOWED_CONTENT_TYPES = Set.of(
+            "image/jpeg", "image/png", "image/gif", "image/webp", "image/bmp"
+    );
+
+    @Value("${app.upload.dir:uploads}")
     private String uploadDir;
 
     @PostMapping
     public ResponseEntity<Map<String, String>> upload(@RequestParam("file") MultipartFile file) {
         if (file.isEmpty()) {
             throw new ApiException("请选择文件");
+        }
+
+        String contentType = file.getContentType();
+        if (contentType == null || !ALLOWED_CONTENT_TYPES.contains(contentType.toLowerCase())) {
+            throw new ApiException("不支持的文件类型，仅支持图片文件（JPEG/PNG/GIF/WebP/BMP）");
         }
 
         String originalName = file.getOriginalFilename();

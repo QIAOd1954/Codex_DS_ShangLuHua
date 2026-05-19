@@ -9,10 +9,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.shangluhua.app.common.ApiException;
+import com.shangluhua.app.inventory.InventoryBizType;
 import com.shangluhua.app.inventory.InventoryService;
 import com.shangluhua.app.product.ProductSku;
 import com.shangluhua.app.product.ProductSkuRepository;
@@ -68,14 +70,14 @@ public class PurchaseOrderService {
     }
 
     @Transactional(readOnly = true)
-    public List<PurchaseOrder> search(String keyword, String status) {
+    public List<PurchaseOrder> search(String keyword, String status, int page, int size) {
         if (keyword != null && !keyword.isBlank()) {
             return orderRepository.findByOrderNoContainingIgnoreCaseOrderByCreatedAtDesc(keyword);
         }
         if (status != null && !status.isBlank()) {
             return orderRepository.findByStatusOrderByCreatedAtDesc(PurchaseOrderStatus.valueOf(status));
         }
-        return orderRepository.findTop100ByOrderByCreatedAtDesc();
+        return orderRepository.findAllByOrderByCreatedAtDesc(PageRequest.of(page, size)).getContent();
     }
 
     @Transactional(readOnly = true)
@@ -97,7 +99,7 @@ public class PurchaseOrderService {
                     item.getSku().getId(),
                     order.getWarehouseCode(),
                     item.getQuantity(),
-                    "PURCHASE_IN",
+                    InventoryBizType.PURCHASE_IN,
                     order.getId()
             );
         }
@@ -111,9 +113,20 @@ public class PurchaseOrderService {
     public PurchaseOrder cancel(Long id) {
         PurchaseOrder order = orderRepository.lockWithItems(id)
                 .orElseThrow(() -> new ApiException("采购单不存在: " + id));
-        if (order.getStatus() != PurchaseOrderStatus.DRAFT) {
-            throw new ApiException("只有草稿状态的采购单才能取消");
+        if (order.getStatus() != PurchaseOrderStatus.CONFIRMED) {
+            throw new ApiException("只有已入库的采购单才能取消");
         }
+
+        for (PurchaseOrderItem item : order.getItems()) {
+            inventoryService.adjust(
+                    item.getSku().getId(),
+                    order.getWarehouseCode(),
+                    -item.getQuantity(),
+                    InventoryBizType.PURCHASE_CANCELED,
+                    order.getId()
+            );
+        }
+
         order.setStatus(PurchaseOrderStatus.CANCELED);
         return orderRepository.save(order);
     }

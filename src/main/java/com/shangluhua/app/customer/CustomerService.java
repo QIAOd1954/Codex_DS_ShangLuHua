@@ -3,10 +3,12 @@ package com.shangluhua.app.customer;
 import java.math.BigDecimal;
 import java.util.List;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.shangluhua.app.common.ApiException;
+import com.shangluhua.app.customer.CustomerStatus;
 
 @Service
 public class CustomerService {
@@ -29,21 +31,22 @@ public class CustomerService {
     }
 
     @Transactional(readOnly = true)
-    public List<Customer> search(String keyword) {
+    public List<Customer> search(String keyword, int page, int size) {
         List<Customer> customers;
+        PageRequest pageable = PageRequest.of(page, size);
         if (keyword == null || keyword.isBlank()) {
-            customers = customerRepository.findAll();
+            customers = customerRepository.findAll(pageable).getContent();
         } else {
-            customers = customerRepository.findTop50ByNameContainingIgnoreCaseOrPhoneContainingIgnoreCase(keyword, keyword);
+            customers = customerRepository.findByNameContainingIgnoreCaseOrPhoneContainingIgnoreCase(keyword, keyword, pageable).getContent();
         }
-        return customers.stream().filter(customer -> !"DELETED".equals(customer.getStatus())).toList();
+        return customers.stream().filter(customer -> customer.getStatus() != CustomerStatus.DELETED).toList();
     }
 
     @Transactional(readOnly = true)
     public Customer get(Long id) {
-        Customer customer = customerRepository.findById(id).orElseThrow(() -> new ApiException("Customer not found: " + id));
-        if ("DELETED".equals(customer.getStatus())) {
-            throw new ApiException("Customer not found: " + id);
+        Customer customer = customerRepository.findById(id).orElseThrow(() -> new ApiException("客户不存在: " + id));
+        if (customer.getStatus() == CustomerStatus.DELETED) {
+            throw new ApiException("客户不存在: " + id);
         }
         return customer;
     }
@@ -64,7 +67,7 @@ public class CustomerService {
     @Transactional
     public void delete(Long id) {
         Customer customer = get(id);
-        customer.setStatus("DELETED");
+        customer.setStatus(CustomerStatus.DELETED);
         customerRepository.save(customer);
     }
 }

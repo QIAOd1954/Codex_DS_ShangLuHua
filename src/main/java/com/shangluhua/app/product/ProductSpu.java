@@ -8,6 +8,8 @@ import java.util.List;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -35,7 +37,8 @@ public class ProductSpu {
     private BigDecimal wholesalePrice = BigDecimal.ZERO;
     private BigDecimal costPrice = BigDecimal.ZERO;
     private String imageUrl;
-    private String status = "ON_SALE";
+    @Enumerated(EnumType.STRING)
+    private ProductStatus status = ProductStatus.ON_SALE;
     private Instant createdAt = Instant.now();
 
     @OneToMany(mappedBy = "spu", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
@@ -65,8 +68,8 @@ public class ProductSpu {
     public void setCostPrice(BigDecimal costPrice) { this.costPrice = costPrice; }
     public String getImageUrl() { return imageUrl; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public ProductStatus getStatus() { return status; }
+    public void setStatus(ProductStatus status) { this.status = status; }
     public Instant getCreatedAt() { return createdAt; }
     public List<ProductSku> getSkus() { return skus; }
 }

@@ -34,8 +34,10 @@ public class SalesOrderController {
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String startDate,
-            @RequestParam(required = false) String endDate) {
-        return salesOrderService.search(keyword, status, startDate, endDate)
+            @RequestParam(required = false) String endDate,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "100") int size) {
+        return salesOrderService.search(keyword, status, startDate, endDate, page, size)
                 .stream().map(SalesOrderResponse::from).toList();
     }
 

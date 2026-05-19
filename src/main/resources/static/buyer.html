@@ -306,6 +306,8 @@
 
     function money(v) { return Number(v || 0).toFixed(2); }
 
+    function prodImg(p) { return p.imageUrl || '/assets/product-shirt.png'; }
+
     function comboKey(productId, color, size) { return `${productId}-${color}-${size}`; }
 
     function updateCartUI() {

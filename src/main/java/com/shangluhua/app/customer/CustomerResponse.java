@@ -9,7 +9,7 @@ public record CustomerResponse(
         String wechat,
         String levelName,
         BigDecimal debtBalance,
-        String status
+        CustomerStatus status
 ) {
     public static CustomerResponse from(Customer customer) {
         return new CustomerResponse(

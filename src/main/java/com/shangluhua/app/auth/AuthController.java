@@ -15,17 +15,21 @@ public class AuthController {
     private final AdminUserRepository adminUserRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final LoginRateLimiter rateLimiter;
 
     public AuthController(AdminUserRepository adminUserRepository,
                           PasswordEncoder passwordEncoder,
-                          JwtUtil jwtUtil) {
+                          JwtUtil jwtUtil,
+                          LoginRateLimiter rateLimiter) {
         this.adminUserRepository = adminUserRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
+        this.rateLimiter = rateLimiter;
     }
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
+        rateLimiter.check();
         if (adminUserRepository.count() == 0) {
             AdminUser defaultUser = new AdminUser("admin", passwordEncoder.encode("123456"), "系统管理员");
             adminUserRepository.save(defaultUser);
@@ -35,10 +39,11 @@ public class AuthController {
         if (!passwordEncoder.matches(request.password(), user.getPassword())) {
             throw new ApiException("用户名或密码错误");
         }
-        if (!"ACTIVE".equals(user.getStatus())) {
+        if (user.getStatus() != AdminUserStatus.ACTIVE) {
             throw new ApiException("账号已被禁用");
         }
         String token = jwtUtil.generateToken(user.getId(), user.getUsername());
+        rateLimiter.reset();
         return ResponseEntity.ok(new LoginResponse(token, user.getUsername(), user.getDisplayName(), user.getRole()));
     }
 

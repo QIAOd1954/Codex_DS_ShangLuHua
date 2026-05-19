@@ -13,11 +13,13 @@ import com.shangluhua.app.customer.CreateCustomerRequest;
 import com.shangluhua.app.customer.CustomerService;
 import com.shangluhua.app.auth.AdminUser;
 import com.shangluhua.app.auth.AdminUserRepository;
+import com.shangluhua.app.inventory.InventoryBizType;
 import com.shangluhua.app.inventory.InventoryService;
 import com.shangluhua.app.product.CreateProductRequest;
 import com.shangluhua.app.product.ProductService;
 import com.shangluhua.app.product.ProductSpu;
 import com.shangluhua.app.product.ProductSpuRepository;
+import com.shangluhua.app.product.ProductStatus;
 
 @Component
 public class DemoDataSeeder implements CommandLineRunner {
@@ -82,7 +84,7 @@ public class DemoDataSeeder implements CommandLineRunner {
         int amount = 24;
         for (ProductSpu product : products) {
             for (var sku : product.getSkus()) {
-                inventoryService.adjust(sku.getId(), "MAIN", amount + (int) (sku.getId() % 31), "DEMO_SEED", product.getId());
+                inventoryService.adjust(sku.getId(), "MAIN", amount + (int) (sku.getId() % 31), InventoryBizType.DEMO_SEED, product.getId());
             }
             amount += 8;
         }

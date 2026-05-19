@@ -22,7 +22,6 @@ public class InventoryBalance {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "warehouse_code")
     private String warehouseCode = "MAIN";
 
     @ManyToOne(fetch = FetchType.LAZY)

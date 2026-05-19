@@ -18,7 +18,8 @@ public class AdminUser {
 
     private String displayName;
     private String role = "ADMIN";
-    private String status = "ACTIVE";
+    @Enumerated(EnumType.STRING)
+    private AdminUserStatus status = AdminUserStatus.ACTIVE;
     private Instant createdAt = Instant.now();
 
     public AdminUser() {}
@@ -36,6 +37,6 @@ public class AdminUser {
     public String getDisplayName() { return displayName; }
     public void setDisplayName(String displayName) { this.displayName = displayName; }
     public String getRole() { return role; }
-    public String getStatus() { return status; }
+    public AdminUserStatus getStatus() { return status; }
     public Instant getCreatedAt() { return createdAt; }
 }

@@ -10,5 +10,6 @@ spring:
     open-in-view: false
     properties:
       hibernate:
+        globally_quoted_identifiers: true
         dialect: org.hibernate.dialect.MySQLDialect
         format_sql: true

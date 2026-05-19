@@ -8,12 +8,14 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.shangluhua.app.common.ApiException;
 import com.shangluhua.app.customer.Customer;
 import com.shangluhua.app.customer.CustomerRepository;
+import com.shangluhua.app.inventory.InventoryBizType;
 import com.shangluhua.app.inventory.InventoryService;
 import com.shangluhua.app.product.ProductSku;
 import com.shangluhua.app.product.ProductSkuRepository;
@@ -41,6 +43,9 @@ public class SalesOrderService {
         order.setOrderNo(newOrderNo());
         order.setWarehouseCode(request.warehouseCode() == null || request.warehouseCode().isBlank() ? "MAIN" : request.warehouseCode());
         order.setPaidAmount(defaultMoney(request.paidAmount()));
+        if (order.getPaidAmount().compareTo(BigDecimal.ZERO) < 0) {
+            throw new ApiException("实付金额不能为负数");
+        }
         order.setContactName(request.contactName());
         order.setContactPhone(request.contactPhone());
 
@@ -53,8 +58,14 @@ public class SalesOrderService {
         BigDecimal total = BigDecimal.ZERO;
         for (CreateSalesOrderRequest.Item input : request.items()) {
             ProductSku sku = skuRepository.findById(input.skuId())
-                    .orElseThrow(() -> new ApiException("SKU 不存在: " + input.skuId()));
+                    .orElseThrow(() -> new ApiException("SKU不存在: " + input.skuId()));
             BigDecimal unitPrice = input.unitPrice() == null ? sku.getWholesalePrice() : input.unitPrice();
+            if (unitPrice.compareTo(BigDecimal.ZERO) < 0) {
+                throw new ApiException("单价不能为负数");
+            }
+            if (input.unitPrice() != null && input.unitPrice().compareTo(sku.getWholesalePrice()) < 0) {
+                throw new ApiException("单价不能低于批发价");
+            }
             BigDecimal amount = unitPrice.multiply(BigDecimal.valueOf(input.quantity()));
 
             SalesOrderItem item = new SalesOrderItem();
@@ -77,7 +88,7 @@ public class SalesOrderService {
     }
 
     @Transactional(readOnly = true)
-    public List<SalesOrder> search(String keyword, String status, String startDate, String endDate) {
+    public List<SalesOrder> search(String keyword, String status, String startDate, String endDate, int page, int size) {
         if (keyword != null && !keyword.isBlank()) {
             return orderRepository.searchByKeyword(keyword);
         }
@@ -89,7 +100,12 @@ public class SalesOrderService {
             Instant end = LocalDate.parse(endDate).plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant();
             return orderRepository.findByCreatedAtBetweenOrderByCreatedAtDesc(start, end);
         }
-        return orderRepository.findTop100ByOrderByCreatedAtDesc();
+        return orderRepository.findAllByOrderByCreatedAtDesc(PageRequest.of(page, size)).getContent();
+    }
+
+    @Transactional(readOnly = true)
+    public List<SalesOrder> searchByPhone(String phone) {
+        return orderRepository.findByContactPhoneOrderByCreatedAtDesc(phone);
     }
 
     @Transactional(readOnly = true)
@@ -107,7 +123,7 @@ public class SalesOrderService {
         }
 
         for (SalesOrderItem item : order.getItems()) {
-            inventoryService.adjust(item.getSku().getId(), order.getWarehouseCode(), -item.getQuantity(), "SALES_ORDER", order.getId());
+            inventoryService.adjust(item.getSku().getId(), order.getWarehouseCode(), -item.getQuantity(), InventoryBizType.SALES_ORDER, order.getId());
         }
 
         if (order.getCustomer() != null && order.getDebtAmount().compareTo(BigDecimal.ZERO) > 0) {
@@ -131,7 +147,7 @@ public class SalesOrderService {
 
         // 恢复库存
         for (SalesOrderItem item : order.getItems()) {
-            inventoryService.adjust(item.getSku().getId(), order.getWarehouseCode(), item.getQuantity(), "SALES_CANCEL", order.getId());
+            inventoryService.adjust(item.getSku().getId(), order.getWarehouseCode(), item.getQuantity(), InventoryBizType.SALES_CANCELED, order.getId());
         }
 
         // 扣减客户欠款
